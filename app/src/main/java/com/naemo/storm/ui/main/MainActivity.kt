@@ -193,7 +193,7 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>(), MainNavi
         })
     }
 
-    private fun displayCityWeather(it: CityWeather?) {
+    private fun displayCityWeather(it: CityWeather) {
         getViewModel()?.cityWeather(it)
     }
 
@@ -208,18 +208,18 @@ class MainActivity: BaseActivity<ActivityMainBinding, MainViewModel>(), MainNavi
         displayCityForecast(cityForecast)
     }
 
+    override fun retrieveOldCityWeather(cityWeather: CityWeather?) {
+        cityWeather?.let { displayCityWeather(it) }
+    }
+
     override fun searchName() {
         hideKeyBoard()
        getViewModel()?.getCityWeatherData()
         getViewModel()?.getCityForecastData()
     }
 
-    override fun showDialog() {
-        appUtils?.showDialog(this)
-    }
-
-    override fun hideDialog() {
-        appUtils?.cancelDialog()
+    override fun showSnackBarMsg(msg: String) {
+        appUtils?.showSnackBar(this, main_frame, msg)
     }
 
     private fun displayCityForecast(it: CityForecast?) {

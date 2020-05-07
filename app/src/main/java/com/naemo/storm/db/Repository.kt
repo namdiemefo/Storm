@@ -66,7 +66,7 @@ class Repository(application: Application) : CoroutineScope {
 
     private suspend fun save(cityWeather: CityWeather?) {
         withContext(IO) {
-            cityWeatherDao.deleteCityWeather()
+            //cityWeatherDao.deleteCityWeather()
             cityWeatherDao.insertCityWeather(cityWeather)
         }
     }
@@ -81,12 +81,12 @@ class Repository(application: Application) : CoroutineScope {
 
     private suspend fun save(cityForecast: CityForecast?) {
         withContext(IO) {
-            cityForecastDao.deleteCityForecast()
+            //cityForecastDao.deleteCityForecast()
             cityForecastDao.insertCityForecast(cityForecast)
         }
     }
 
-    suspend fun searchCityWeather(name: String): CityWeather {
+    suspend fun searchCityWeather(name: String): CityWeather? {
         return withContext(IO) {
             cityWeatherDao.searchCityWeather(name)
         }

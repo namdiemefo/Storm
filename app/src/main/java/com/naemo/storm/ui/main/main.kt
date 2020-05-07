@@ -42,32 +42,28 @@ class MainViewModel(application: Application) : BaseViewModel<MainNavigator>(app
         @Inject set
 
     fun getCityForecastData() {
-       // getNavigator()?.showDialog()
         val name = search.get().toString()
         val cityForecastResponseCall: Call<CityForecast> = client.getApi().getCityForecast(name, BuildConfig.WEATHER_API_TOKEN)
         cityForecastResponseCall.enqueue(object : Callback<CityForecast> {
             override fun onResponse(call: Call<CityForecast>, response: Response<CityForecast>) {
                 if (response.isSuccessful) {
-                   // getNavigator()?.hideDialog()
                     val cityForecast = response.body()
                     saveCityForecast(cityForecast)
-                    getNavigator()?.retrieveCityForecast()
+                    getNavigator()?.retrieveOldCityForecast(cityForecast)
                 } else {
-                  //  getNavigator()?.hideDialog()
                     launch {
                         val cityForecast = repository.search(name)
-                        getNavigator()?.retrieveOldCityForecast(cityForecast)
+                        cityForecast.let { getNavigator()?.retrieveOldCityForecast(it)  }
                     }
                 }
             }
 
             override fun onFailure(call: Call<CityForecast>, t: Throwable) {
                 if (t is  IOException) {
-                   // getNavigator()?.hideDialog()
                     call.cancel()
                     launch {
                         val cityForecast = repository.search(name)
-                        getNavigator()?.retrieveOldCityForecast(cityForecast)
+                        cityForecast.let { getNavigator()?.retrieveOldCityForecast(it)  }
                     }
                 }
             }
@@ -75,32 +71,36 @@ class MainViewModel(application: Application) : BaseViewModel<MainNavigator>(app
     }
 
     fun getCityWeatherData() {
-      //  getNavigator()?.showDialog()
         val name = search.get().toString()
         val cityWeatherResponseCall: Call<CityWeather> = client.getApi().getCityWeather(name, BuildConfig.WEATHER_API_TOKEN)
         cityWeatherResponseCall.enqueue(object : Callback<CityWeather> {
             override fun onResponse(call: Call<CityWeather>, response: Response<CityWeather>) {
                 if (response.isSuccessful) {
-                   // getNavigator()?.hideDialog()
                     val cityWeather = response.body()
                     saveCityWeather(cityWeather)
-                    getNavigator()?.retrieveCityWeather()
+                    cityWeather?.let { cityWeather(it) }
                 } else {
-                   // getNavigator()?.hideDialog()
                     launch {
                         val cityWeather = repository.searchCityWeather(name)
-                        cityWeather(cityWeather)
+                        if (cityWeather == null) {
+                            getNavigator()?.showSnackBarMsg("$name was not found, check internet connectivity")
+                        } else  {
+                            cityWeather(cityWeather)
+                        }
                     }
                 }
             }
 
             override fun onFailure(call: Call<CityWeather>, t: Throwable) {
                 if (t is IOException) {
-                   // getNavigator()?.hideDialog()
                     call.cancel()
                     launch {
                         val cityWeather = repository.searchCityWeather(name)
-                        cityWeather(cityWeather)
+                        if (cityWeather == null) {
+                            getNavigator()?.showSnackBarMsg("$name was not found, check internet connectivity")
+                        } else  {
+                            cityWeather(cityWeather)
+                        }
                     }
                 }
             }
@@ -108,8 +108,6 @@ class MainViewModel(application: Application) : BaseViewModel<MainNavigator>(app
     }
 
     fun getLocationForecastData(latitude: Double, longitude: Double) {
-        Log.d("name12", latitude.toString())
-        Log.d("name11", longitude.toString())
         val locationForecastResponseCall: Call<LocationForecast> = client.getApi().getLocationForecast(latitude, longitude, BuildConfig.WEATHER_API_TOKEN)
         locationForecastResponseCall.enqueue(object : Callback<LocationForecast> {
             override fun onResponse(call: Call<LocationForecast>, response: Response<LocationForecast>) {
@@ -160,12 +158,12 @@ class MainViewModel(application: Application) : BaseViewModel<MainNavigator>(app
         temperature.set(locationWeather?.main?.temp.toString())
     }
 
-    fun cityWeather(cityWeather: CityWeather?) {
-        name.set(cityWeather?.name)
-        pressure.set(cityWeather?.main?.pressure.toString())
-        humidity.set(cityWeather?.main?.humidity.toString())
-        clouds.set(cityWeather?.weather?.get(0)?.description)
-        temperature.set(cityWeather?.main?.temp.toString())
+    fun cityWeather(cityWeather: CityWeather) {
+        name.set(cityWeather.name)
+        pressure.set(cityWeather.main.pressure.toString())
+        humidity.set(cityWeather.main.humidity.toString())
+        clouds.set(cityWeather.weather[0].description)
+        temperature.set(cityWeather.main.temp.toString())
     }
 
     fun saveLocationWeather(locationWeather: LocationWeather?)  {
@@ -215,11 +213,11 @@ interface MainNavigator {
 
     fun retrieveOldCityForecast(cityForecast: CityForecast?)
 
+    fun retrieveOldCityWeather(cityWeather: CityWeather?)
+
     fun searchName()
 
-    fun showDialog()
-
-    fun hideDialog()
+    fun showSnackBarMsg(msg: String)
 }
 
 @Module
