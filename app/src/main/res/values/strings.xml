@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Storm</string>
+    <string name="neo_yokio">London</string>
+    <string name="location_weather">Location Weather</string>
+    <string name="city">City:</string>
+    <string name="location_forecast">5-day Location Forecast</string>
+    <string name="pressure">Pressure:</string>
+    <string name="humidity">Humidity:</string>
+    <string name="clouds">Clouds:</string>
+    <string name="temp">Temperature:</string>
+    <string name="day1">Day1</string>
+    <string name="dt"><![CDATA[Date & Time]]></string>
+</resources>
